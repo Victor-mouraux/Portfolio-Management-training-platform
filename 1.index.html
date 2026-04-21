@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ING PM Internship — Training Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ing-navy: #0E3370;
+    --ing-orange: #FF6200;
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface2: #f0f2f7;
+    --border: rgba(0,0,0,0.09);
+    --border-md: rgba(0,0,0,0.15);
+    --text: #111827;
+    --text-2: #4b5563;
+    --text-3: #9ca3af;
+    --green-bg: #ecfdf5; --green-text: #065f46;
+    --red-bg: #fef2f2; --red-text: #991b1b;
+    --blue-bg: #eff6ff; --blue-text: #1d4ed8;
+    --amber-bg: #fffbeb; --amber-text: #92400e;
+    --radius: 10px; --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header { background: var(--ing-navy); color: #fff; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(14,51,112,0.25); }
+  header .logo { font-size: 15px; font-weight: 600; letter-spacing: 0.3px; display: flex; align-items: center; gap: 10px; }
+  header .logo span { color: var(--ing-orange); }
+  header .badge { font-size: 11px; background: rgba(255,255,255,0.15); padding: 3px 10px; border-radius: 99px; }
+
+  .layout { display: flex; min-height: calc(100vh - 56px); }
+
+  nav { width: 220px; background: var(--surface); border-right: 0.5px solid var(--border); padding: 1.5rem 0; flex-shrink: 0; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; }
+  .nav-section { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.8px; padding: 0 1.25rem; margin: 1.25rem 0 0.5rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 1.25rem; font-size: 13.5px; color: var(--text-2); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { background: #eff4ff; color: var(--ing-navy); border-left-color: var(--ing-navy); font-weight: 500; }
+  .nav-item .icon { font-size: 15px; width: 20px; text-align: center; }
+  .nav-progress { margin: 0 1.25rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 0.5px solid var(--border); }
+  .nav-progress-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; }
+  .bar { height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--ing-navy); border-radius: 99px; transition: width 0.4s; }
+
+  main { flex: 1; padding: 2rem; max-width: 860px; }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  h1 { font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .subtitle { font-size: 14px; color: var(--text-2); margin-bottom: 1.5rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.75rem; }
+  .stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; box-shadow: var(--shadow); }
+  .stat-label { font-size: 11px; color: var(--text-3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 26px; font-weight: 600; color: var(--ing-navy); }
+
+  .module-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+  .module-row { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow); }
+  .module-row:hover { border-color: var(--ing-navy); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14,51,112,0.1); }
+  .module-row-left { display: flex; align-items: center; gap: 12px; }
+  .module-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--blue-bg); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .module-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .module-desc { font-size: 12px; color: var(--text-3); margin-top: 1px; }
+  .pill { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+  .pill-done { background: var(--green-bg); color: var(--green-text); }
+  .pill-todo { background: var(--surface2); color: var(--text-3); }
+  .pill-crit { background: var(--amber-bg); color: var(--amber-text); }
+
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+  .card h2 { font-size: 17px; font-weight: 600; margin-bottom: 1rem; color: var(--text); }
+  .card p, .card li { font-size: 14px; line-height: 1.75; color: var(--text-2); }
+  .card ul { margin: 8px 0 8px 18px; }
+  .card strong { color: var(--text); font-weight: 500; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 99px; font-weight: 500; }
+  .tag-blue { background: var(--blue-bg); color: var(--blue-text); }
+  .tag-green { background: var(--green-bg); color: var(--green-text); }
+  .tag-amber { background: var(--amber-bg); color: var(--amber-text); }
+
+  .formula { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; background: var(--surface2); border: 0.5px solid var(--border-md); border-radius: 8px; padding: 10px 16px; margin: 12px 0; color: var(--ing-navy); font-weight: 500; }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 1.25rem; flex-wrap: wrap; }
+  .btn { padding: 9px 20px; border-radius: var(--radius); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: none; }
+  .btn-primary { background: var(--ing-navy); color: #fff; }
+  .btn-primary:hover { background: #0c2d64; }
+  .btn-outline { background: transparent; color: var(--text-2); border: 0.5px solid var(--border-md); }
+  .btn-outline:hover { background: var(--surface2); color: var(--text); }
+  .btn-orange { background: var(--ing-orange); color: #fff; }
+  .btn-orange:hover { background: #e55a00; }
+
+  .quiz-q { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 1.25rem; line-height: 1.6; }
+  .quiz-counter { font-size: 12px; color: var(--text-3); margin-bottom: 1rem; }
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt { text-align: left; padding: 12px 16px; border: 0.5px solid var(--border-md); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 14px; cursor: pointer; transition: all 0.15s; }
+  .opt:hover:not(:disabled) { background: var(--bg); border-color: var(--ing-navy); }
+  .opt.correct { border-color: #065f46; background: var(--green-bg); color: var(--green-text); font-weight: 500; }
+  .opt.wrong { border-color: #991b1b; background: var(--red-bg); color: var(--red-text); }
+  .feedback { font-size: 13px; line-height: 1.65; padding: 12px 16px; border-radius: var(--radius); margin-top: 12px; }
+  .feedback.ok { background: var(--green-bg); color: var(--green-text); }
+  .feedback.ko { background: var(--red-bg); color: var(--red-text); }
+
+  .interview-q { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 1rem; line-height: 1.6; }
+  .tip { font-size: 13.5px; line-height: 1.7; color: var(--text-2); padding: 14px 18px; border-left: 3px solid var(--ing-navy); background: var(--blue-bg); border-radius: 0 var(--radius) var(--radius) 0; }
+  .tip strong { color: var(--ing-navy); }
+
+  .score-big { font-size: 48px; font-weight: 700; color: var(--ing-navy); text-align: center; margin: 1rem 0 0.5rem; }
+  .score-sub { font-size: 14px; color: var(--text-2); text-align: center; margin-bottom: 1.5rem; }
+
+  @media (max-width: 700px) {
+    nav { display: none; }
+    main { padding: 1.25rem; }
+    .grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ING <span>Wholesale Banking</span> — Portfolio Management Prep</div>
+  <div class="badge">Internship 2026</div>
+</header>
+
+<div class="layout">
+  <nav>
+    <div class="nav-section">Vue d'ensemble</div>
+    <div class="nav-item active" onclick="show('dashboard')"><span class="icon">📊</span> Dashboard</div>
+
+    <div class="nav-section">Modules</div>
+    <div class="nav-item" onclick="show('credit')"><span class="icon">📋</span> Analyse crédit</div>
+    <div class="nav-item" onclick="show('lending')"><span class="icon">🏦</span> Structures de prêt</div>
+    <div class="nav-item" onclick="show('ews')"><span class="icon">⚠️</span> Early Warning Signals</div>
+    <div class="nav-item" onclick="show('raroc')"><span class="icon">⚡</span> Capital velocity</div>
+    <div class="nav-item" onclick="show('sectors')"><span class="icon">🏗️</span> Secteurs</div>
+
+    <div class="nav-section">Entraînement</div>
+    <div class="nav-item" onclick="show('quiz')"><span class="icon">🎯</span> Quiz crédit</div>
+    <div class="nav-item" onclick="show('interview')"><span class="icon">🗣️</span> Mock interview</div>
+    <div class="nav-item" onclick="show('ratios')"><span class="icon">🔢</span> Ratios & formules</div>
+
+    <div class="nav-progress">
+      <div class="nav-progress-label" id="progress-label">Progression : 0%</div>
+      <div class="bar"><div class="bar-fill" id="nav-bar" style="width:0%"></div></div>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <div id="screen-dashboard" class="screen active">
+      <h1>Tableau de bord</h1>
+      <p class="subtitle">ING Wholesale Banking — Portfolio Management Internship · Brussels · July 2026</p>
+      <div class="grid">
+        <div class="stat-card"><div class="stat-label">Modules vus</div><div class="stat-value" id="s-modules">0/5</div></div>
+        <div class="stat-card"><div class="stat-label">Score quiz</div><div class="stat-value" id="s-score">—</div></div>
+        <div class="stat-card"><div class="stat-label">Questions interview</div><div class="stat-value" id="s-interview">0/6</div></div>
+        <div class="stat-card"><div class="stat-label">Niveau</div><div class="stat-value" id="s-level">Débutant</div></div>
+      </div>
+      <div class="module-list">
+        <div class="module-row" onclick="show('credit')">
+          <div class="module-row-left">
+            <div class="module-icon">📋</div>
+            <div><div class="module-name">Analyse crédit & covenants</div><div class="module-desc">Ratios, seuils, breaches</div></div>
+          </div>
+          <span class="pill pill-crit" id="b-credit">Essentiel</span>
+        </div>
+        <div class="module-row" onclick="show('lending')">
+          <div class="module-row-left">
+            <div class="module-icon">🏦</div>
+            <div><div class="module-name">Structures de prêt</div><div class="module-desc">Term loan, RCF, syndication</div></div>
+          </div>
+          <span class="pill pill-todo" id="b-lending">À faire</span>
+        </div>
+        <div class="module-row" onclick="show('ews')">
+          <div class="module-row-left">
+            <div class="module-icon">⚠️</div>
+            <div><div class="module-name">Early Warning Signals</div><div class="module-desc">Détecter la dégradation crédit</div></div>
+          </div>
+          <span class="pill pill-todo" id="b-ews">À faire</span>
+        </div>
+        <div class="module-row" onclick="show('raroc')">
+          <div class="module-row-left">
+            <div class="module-icon">⚡</div>
+            <div><div class="module-name">Capital velocity & RAROC</div><div class="module-desc">Logique de rentabilité ajustée</div></div>
+          </div>
+          <span class="pill pill-todo" id="b-raroc">À faire</span>
+        </div>
+        <div class="module-row" onclick="show('sectors')">
+          <div class="module-row-left">
+            <div class="module-icon">🏗️</div>
+            <div><div class="module-name">Secteurs ING</div><div class="module-desc">Energy, Infrastructure, Real Estate</div></div>
+          </div>
+          <span class="pill pill-todo" id="b-sectors">À faire</span>
+        </div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-primary" onclick="show('quiz')">Commencer le quiz →</button>
+        <button class="btn btn-outline" onclick="show('interview')">Mock interview →</button>
+      </div>
+    </div>
+
+    <!-- CREDIT -->
+    <div id="screen-credit" class="screen">
+      <h1>Analyse crédit & covenants</h1>
+      <p class="subtitle">La base du métier de Portfolio Manager</p>
+      <div class="tags"><span class="tag tag-green">CFA Level 1</span><span class="tag tag-blue">Essentiel ING</span><span class="tag tag-amber">Entretien garanti</span></div>
+      <div class="card">
+        <h2>Qu'est-ce qu'un covenant financier ?</h2>
+        <p>Un <strong>covenant financier</strong> est une clause contractuelle imposée à l'emprunteur dans le cadre d'un prêt. Il définit des seuils que l'entreprise doit respecter sous peine d'être en <strong>défaut technique</strong> — même si elle paie ses intérêts.</p>
+        <ul>
+          <li><strong>Maintenance covenant</strong> : testé trimestriellement (ex: Debt/EBITDA &lt; 4.0x)</li>
+          <li><strong>Incurrence covenant</strong> : déclenché seulement si l'emprunteur fait une action (ex: pas d'acquisition si levier &gt; 3.5x)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Exemples concrets de covenants ING</h2>
+        <div class="formula">Debt / EBITDA &lt; 4.0x — levier maximum</div>
+        <div class="formula">Interest Coverage Ratio &gt; 3.0x — couverture des intérêts</div>
+        <div class="formula">Minimum Cash &gt; €10M — coussin de liquidité</div>
+        <p>En tant que PM, tu reçois les rapports financiers trimestriels et tu calcules ces ratios. Si un covenant est <strong>approché à 85%</strong>, tu contactes l'emprunteur. S'il est <strong>breché</strong>, tu alertes le credit committee et Risk.</p>
+      </div>
+      <div class="card">
+        <h2>Pourquoi les covenants existent</h2>
+        <p>Sans covenants, une entreprise pourrait s'endetter massivement <em>après</em> la signature du prêt, augmentant le risque de la banque sans compensation. Les covenants créent une <strong>obligation de transparence</strong> et donnent à la banque un levier de renégociation précoce.</p>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-primary" onclick="markDone('credit'); show('lending')">Compris — Module suivant →</button>
+        <button class="btn btn-outline" onclick="show('quiz')">Tester mes connaissances</button>
+      </div>
+    </div>
+
+    <!-- LENDING -->
+    <div id="screen-lending" class="screen">
+      <h1>Structures de prêt (lending)</h1>
+      <p class="subtitle">Ce que ING Wholesale finance et comment</p>
+      <div class="tags"><span class="tag tag-blue">Wholesale Banking</span><span class="tag tag-green">Essentiel</span></div>
+      <div class="card">
+        <h2>Types de facilités</h2>
+        <p><strong>Term Loan :</strong> montant fixe remboursé selon un échéancier prédéfini. Utilisé pour financer des acquisitions, des capex majeurs. Ex: €500M sur 5 ans pour un rachat d'entreprise.</p><br>
+        <p><strong>Revolving Credit Facility (RCF) :</strong> ligne de crédit flexible. L'emprunteur peut tirer, rembourser, et retirer librement jusqu'au plafond autorisé. Utilisé pour la gestion de liquidité court terme — comme une carte de crédit corporate.</p><br>
+        <p><strong>Capex Facility :</strong> dédiée aux investissements en capital (infrastructure, équipements industriels). Décaissée au fur et à mesure des investissements.</p>
+      </div>
+      <div class="card">
+        <h2>Seniority — ordre de remboursement en cas de défaut</h2>
+        <div class="formula">Senior Secured → Senior Unsecured → Subordinated → Equity</div>
+        <p>ING prête majoritairement en <strong>senior secured</strong> — les prêteurs sont remboursés en premier, et le prêt est garanti par des actifs. Risque de perte (LGD) donc plus faible.</p>
+      </div>
+      <div class="card">
+        <h2>Syndication</h2>
+        <p>Pour les grands prêts (€200M+), plusieurs banques se regroupent. ING peut être :</p>
+        <ul>
+          <li><strong>Mandated Lead Arranger (MLA)</strong> : structure le deal, le distribue aux autres banques, prend une commission d'arrangement</li>
+          <li><strong>Participant</strong> : prend simplement une tranche du prêt</li>
+        </ul>
+        <p style="margin-top:10px;">Le PM gère l'exposition d'ING <em>après</em> la signature, quelle que soit la position dans le syndicat.</p>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-primary" onclick="markDone('lending'); show('ews')">Compris — Module suivant →</button>
+        <button class="btn btn-outline" onclick="show('quiz')">Tester mes connaissances</button>
+      </div>
+    </div>
+
+    <!-- EWS -->
+    <div id="screen-ews" class="screen">
+      <h1>Early Warning Signals (EWS)</h1>
+      <p class="subtitle">Détecter la dégradation crédit avant le défaut</p>
+      <div class="tags"><span class="tag tag-amber">Mission centrale du PM</span><span class="tag tag-blue">Watch list</span></div>
+      <div class="card">
+        <h2>Signaux financiers</h2>
+        <ul>
+          <li>Hausse du levier : Debt/EBITDA franchissant <strong>80% du covenant</strong></li>
+          <li>Baisse du CA ou des marges sur <strong>2+ trimestres consécutifs</strong></li>
+          <li>Current Ratio passant sous <strong>1.0x</strong> (actifs courants &lt; passifs courants)</li>
+          <li>Cash burn anormal — trésorerie qui fond sans investissement identifiable</li>
+          <li>ICR approchant le seuil minimum (ex: tombe de 4x à 3.2x)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Signaux non-financiers</h2>
+        <ul>
+          <li>Changement de <strong>CFO inattendu</strong> + retard dans la remise des comptes</li>
+          <li>Downgrade de rating (Moody's, S&P) — même d'un seul cran</li>
+          <li>Presse négative sur l'entreprise ou son secteur</li>
+          <li>Retards de paiement fournisseurs (allongement du DPO)</li>
+          <li>Perte d'un client majeur représentant >15% du CA</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Le processus EWS chez ING</h2>
+        <p>Quand tu identifies un EWS :</p>
+        <ul>
+          <li>Tu places le dossier en <strong>watch list</strong></li>
+          <li>Tu déclenches une revue crédit renforcée avec le Risk team</li>
+          <li>Tu contactes l'emprunteur pour une mise à jour de management</li>
+          <li>Tu proposes si nécessaire une <strong>waiver</strong> (dérogation temporaire) ou une renégociation des conditions</li>
+        </ul>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-primary" onclick="markDone('ews'); show('raroc')">Compris — Module suivant →</button>
+        <button class="btn btn-outline" onclick="show('quiz')">Tester mes connaissances</button>
+      </div>
+    </div>
+
+    <!-- RAROC -->
+    <div id="screen-raroc" class="screen">
+      <h1>Capital velocity & RAROC</h1>
+      <p class="subtitle">La logique de rentabilité ajustée au risque d'ING</p>
+      <div class="tags"><span class="tag tag-blue">Stratégique</span><span class="tag tag-amber">Priorité ING 2025–2026</span></div>
+      <div class="card">
+        <h2>Capital velocity — pourquoi c'est central</h2>
+        <p>ING a un capital réglementaire limité (Bâle III). L'objectif de <strong>capital velocity</strong> est de le faire "tourner" plutôt que de le laisser immobilisé dans des prêts peu rentables.</p><br>
+        <p>Concrètement, le PM identifie les prêts avec un mauvais RAROC → les vend sur le marché secondaire (loan trading) → libère du capital → permet à ING de financer de nouveaux deals plus rentables.</p>
+      </div>
+      <div class="card">
+        <h2>RAROC — Risk-Adjusted Return on Capital</h2>
+        <div class="formula">RAROC = (Revenus nets − Coûts opérationnels − Pertes attendues) / Capital économique</div>
+        <p>Permet de <strong>comparer la vraie rentabilité</strong> de deux prêts en tenant compte du risque de chacun.</p><br>
+        <p>Exemple : un prêt à 3% sur une contrepartie AA peut avoir un meilleur RAROC qu'un prêt à 5% sur une contrepartie BB, si le capital économique requis pour le BB est 3x plus élevé.</p>
+      </div>
+      <div class="card">
+        <h2>Marché secondaire des prêts</h2>
+        <p>Les prêts syndiqués peuvent être vendus à d'autres investisseurs (autres banques, CLO managers, hedge funds) sur le marché secondaire. ING peut donc <strong>gérer activement</strong> son portefeuille comme un asset manager gère un portefeuille obligataire.</p>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-primary" onclick="markDone('raroc'); show('sectors')">Compris — Module suivant →</button>
+        <button class="btn btn-outline" onclick="show('quiz')">Tester mes connaissances</button>
+      </div>
+    </div>
+
+    <!-- SECTORS -->
+    <div id="screen-sectors" class="screen">
+      <h1>Secteurs : Energy, Infra, Real Estate</h1>
+      <p class="subtitle">Les secteurs couverts par ING Wholesale Belgium</p>
+      <div class="tags"><span class="tag tag-blue">Contexte entretien</span><span class="tag tag-green">Prépare 1 secteur en détail</span></div>
+      <div class="card">
+        <h2>⚡ Energy</h2>
+        <p>Prêts pour centrales, pipelines, éoliennes offshore, projets solaires, hydrogène vert.</p>
+        <ul>
+          <li><strong>Risques spécifiques :</strong> prix de l'énergie, régulation (taxonomie verte EU, SFDR), risque de construction sur les projets greenfield</li>
+          <li><strong>Atout ING :</strong> engagement fort sur la finance durable — ING vise la neutralité carbone de son portefeuille d'ici 2040</li>
+          <li><strong>Angle entretien :</strong> mentionner la transition énergétique et ton intérêt pour les actifs réels durables</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>🏗️ Infrastructure</h2>
+        <p>Autoroutes, aéroports, réseaux télécoms, eau, hôpitaux en PPP.</p>
+        <ul>
+          <li><strong>Caractéristique clé :</strong> cash flows stables et prévisibles sur 20–30 ans → idéal pour le long terme banking</li>
+          <li><strong>Structure typique :</strong> project finance via un SPV (Special Purpose Vehicle) — le prêt est remboursé uniquement par les cash flows du projet</li>
+          <li><strong>Ratio clé :</strong> DSCR (Debt Service Coverage Ratio) = Cash flows du projet / Service de la dette annuel</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>🏢 Real Estate</h2>
+        <p>Bureaux, logistique, résidentiel, hôtellerie, centres commerciaux.</p>
+        <ul>
+          <li><strong>Risques spécifiques :</strong> hausse des taux (impact sur les valuations et le LTV), taux de vacance, obsolescence des bureaux post-COVID</li>
+          <li><strong>Ratios clés :</strong></li>
+        </ul>
+        <div class="formula">LTV = Montant du prêt / Valeur de l'actif immobilier</div>
+        <div class="formula">DSCR = Cash flows locatifs nets / Service de la dette annuel</div>
+        <p><strong>Covenant typique :</strong> LTV &lt; 65%, DSCR &gt; 1.20x</p>
+      </div>
+      <div class="nav-btns">
+        <button class="btn btn-orange" onclick="markDone('sectors'); show('quiz')">Tous les modules vus → Lancer le quiz 🎯</button>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="screen-quiz" class="screen">
+      <h1>Quiz crédit</h1>
+      <p class="subtitle">6 questions du type entretien ING</p>
+      <div id="quiz-body"></div>
+    </div>
+
+    <!-- INTERVIEW -->
+    <div id="screen-interview" class="screen">
+      <h1>Mock interview</h1>
+      <p class="subtitle">Questions réelles posées en entretien Wholesale Banking</p>
+      <div id="interview-body"></div>
+    </div>
+
+    <!-- RATIOS -->
+    <div id="screen-ratios" class="screen">
+      <h1>Ratios & formules</h1>
+      <p class="subtitle">Cheat sheet complète — à mémoriser avant l'entretien</p>
+      <div class="card">
+        <h2>Levier</h2>
+        <div class="formula">Net Debt = Dette financière totale − Cash & équivalents</div>
+        <div class="formula">Debt / EBITDA = Dette nette / EBITDA — covenant typique : &lt; 4.0x</div>
+      </div>
+      <div class="card">
+        <h2>Couverture</h2>
+        <div class="formula">Interest Coverage Ratio (ICR) = EBIT / Charges d'intérêts — covenant : &gt; 3.0x</div>
+        <div class="formula">DSCR = Cash flows opérationnels / (Principal + Intérêts annuels) — cible : &gt; 1.20x</div>
+      </div>
+      <div class="card">
+        <h2>Liquidité</h2>
+        <div class="formula">Current Ratio = Actifs courants / Passifs courants — seuil d'alerte : &lt; 1.0x</div>
+        <div class="formula">Quick Ratio = (Actifs courants − Stocks) / Passifs courants</div>
+      </div>
+      <div class="card">
+        <h2>Real Estate</h2>
+        <div class="formula">LTV = Montant du prêt / Valeur de marché de l'actif — covenant : &lt; 65%</div>
+        <div class="formula">Yield on Cost = Revenus locatifs annuels / Coût total du projet</div>
+      </div>
+      <div class="card">
+        <h2>Rentabilité ajustée</h2>
+        <div class="formula">EBITDA Margin = EBITDA / Chiffre d'affaires × 100</div>
+        <div class="formula">RAROC = (Revenus nets − Coûts − Expected Loss) / Capital économique</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const state = { done: {}, quizIdx: 0, quizCorrect: 0, quizAnswered: 0, interviewIdx: 0 };
+
+const quizData = [
+  { q: "Qu'est-ce qu'un covenant financier dans un prêt corporate ?", opts: ["Une garantie hypothécaire sur les actifs de l'emprunteur", "Une clause contractuelle définissant des seuils financiers à respecter", "Un taux d'intérêt variable indexé sur l'Euribor", "Une option de remboursement anticipé à la discrétion de la banque"], correct: 1, explain: "Un covenant financier est une clause qui impose à l'emprunteur de maintenir certains ratios (ex: Debt/EBITDA < 4x). Si le covenant est breché, la banque peut déclarer un défaut technique et renégocier les conditions du prêt." },
+  { q: "Le Debt/EBITDA d'un emprunteur passe de 3.2x à 4.8x en un trimestre. Quelle est ta priorité en tant que PM ?", opts: ["Ne rien faire, la variation trimestrielle est normale", "Contacter l'emprunteur pour comprendre la cause et envisager une mise en watch list", "Vendre immédiatement le prêt sur le marché secondaire", "Augmenter le taux d'intérêt du prêt unilatéralement"], correct: 1, explain: "Un saut de levier de cette ampleur est un EWS fort. Le PM doit d'abord comprendre la cause (acquisition event-driven et temporaire ? ou dégradation opérationnelle ?). Puis décider si une revue crédit renforcée et une mise en watch list s'imposent." },
+  { q: "Quelle est la différence entre un term loan et une revolving credit facility ?", opts: ["Le term loan est remboursé en une fois à échéance, la RCF est amortie mensuellement", "Le term loan est tiré librement à tout moment, la RCF suit un échéancier fixe", "Le term loan suit un échéancier fixe, la RCF peut être tirée et remboursée librement", "Il n'y a aucune différence structurelle entre les deux"], correct: 2, explain: "Le term loan a un plan d'amortissement contractuellement défini. La RCF est flexible : l'emprunteur peut tirer jusqu'à un plafond, rembourser, et retirer — utile pour gérer la liquidité à court terme comme un besoin en fonds de roulement." },
+  { q: "Qu'est-ce que la 'capital velocity' dans la stratégie d'ING ?", opts: ["La vitesse de traitement des demandes de prêt en interne", "L'objectif de faire tourner le capital en cédant des prêts peu rentables pour en financer de nouveaux", "Le ratio de fonds propres réglementaires imposé par Bâle III", "La rapidité de remboursement exigée des emprunteurs"], correct: 1, explain: "ING cherche à optimiser l'utilisation de son capital réglementaire limité. En vendant des prêts à faible RAROC sur le marché secondaire, elle libère du capital pour financer de nouvelles transactions plus rentables ou dans des secteurs prioritaires." },
+  { q: "Parmi ces signaux, lequel est un Early Warning Signal non-financier ?", opts: ["Un EBITDA margin stable à 18% sur 4 trimestres", "Un renouvellement planifié du PDG après 10 ans de mandat", "Un changement inattendu de CFO accompagné d'un retard dans la remise des comptes", "Une acquisition financée à 60% par equity et 40% par dette"], correct: 2, explain: "Un départ inattendu du CFO + retard de reporting est un signal classique : l'entreprise cache peut-être des problèmes ou est en restructuration silencieuse. C'est exactement le genre de signal non-financier que le PM doit détecter avant qu'il devienne un défaut." },
+  { q: "En Real Estate lending, quel ratio mesure la capacité des revenus locatifs à couvrir le service de la dette ?", opts: ["LTV (Loan-to-Value)", "DSCR (Debt Service Coverage Ratio)", "ICR (Interest Coverage Ratio)", "ROE (Return on Equity)"], correct: 1, explain: "Le DSCR = Cash flows locatifs nets / Service de la dette annuel. Un DSCR > 1.20x est généralement requis — cela signifie que les loyers couvrent les remboursements avec une marge de 20%. Le LTV mesure lui le levier par rapport à la valeur de l'actif : deux métriques complémentaires." }
+];
+
+const interviews = [
+  { q: "Walk me through how you would analyze the creditworthiness of a company.", tip: "<strong>Structure en 5 étapes :</strong> 1) Business model & positionnement sectoriel, 2) Performance financière (CA, EBITDA, marges, cash flow generation), 3) Structure de capital (levier Debt/EBITDA, couverture ICR), 4) Liquidité (Current Ratio, accès à des lignes RCF), 5) Gouvernance & management. Termine par une recommandation claire : 'Je prêterais / je ne prêterais pas car...'." },
+  { q: "What is a covenant and why does it matter for a lender?", tip: "Explique le mécanisme de protection (évite la dégradation post-closing sans alerte), donne 2 exemples concrets avec chiffres (Debt/EBITDA < 4x, ICR > 3x), et explique comment tu les surveilles trimestriellement en tant que PM. Mentionne la distinction maintenance vs incurrence." },
+  { q: "Why ING Wholesale and not retail banking or another institution?", tip: "Mets en avant : (1) l'exposition à des contreparties corporate complexes et à des structures de financement sophistiquées, (2) la dimension internationale d'ING (40+ pays), (3) la culture analytique et la capital velocity comme philosophie — et relie à ton Master Finance UCLouvain + préparation CFA." },
+  { q: "Which sector interests you most — Energy, Infrastructure or Real Estate — and why?", tip: "Choisis-en un et argumente avec les risques spécifiques. Energy : transition + taxonomie verte EU, ING's sustainability commitment. Infra : DSCR, project finance, cash flows prévisibles. Real Estate : LTV, impact des taux sur les valuations. Montre que tu connais les nuances, pas juste les basics." },
+  { q: "What does capital velocity mean for a bank like ING and how does the PM team contribute?", tip: "Définis la logique (capital réglementaire limité → optimiser son utilisation), explique le mécanisme (identification des prêts low-RAROC → cession sur le marché secondaire → réallocation), et positionne le PM comme acteur central de cette stratégie — pas juste un gardien passif du portefeuille." },
+  { q: "Tell me about a time you used data or analytics to identify something or solve a problem.", tip: "Utilise ton expérience AMINDIS : tu as travaillé dans un environnement fintech orienté portfolio management software — tu comprends comment les asset managers utilisent les données pour surveiller la performance. Structure en STAR : Situation, Tâche, Action (outils utilisés), Résultat mesurable." }
+];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+  });
+  if(id === 'quiz') renderQuiz();
+  if(id === 'interview') renderInterview();
+  updateStats();
+}
+
+function markDone(key) {
+  state.done[key] = true;
+  const b = document.getElementById('b-' + key);
+  if(b) { b.textContent = 'Vu ✓'; b.className = 'pill pill-done'; }
+  updateStats();
+}
+
+function updateStats() {
+  const done = Object.keys(state.done).length;
+  document.getElementById('s-modules').textContent = done + '/5';
+  document.getElementById('s-interview').textContent = state.interviewIdx + '/6';
+  if(state.quizAnswered > 0) document.getElementById('s-score').textContent = state.quizCorrect + '/' + state.quizAnswered;
+  const pct = Math.round((done / 5) * 50 + (state.quizCorrect / Math.max(state.quizAnswered, 1)) * 30 * (state.quizAnswered / quizData.length) + (state.interviewIdx / 6) * 20);
+  document.getElementById('nav-bar').style.width = Math.min(pct, 100) + '%';
+  document.getElementById('progress-label').textContent = 'Progression : ' + Math.min(pct, 100) + '%';
+  const level = done >= 4 && state.quizCorrect >= 4 ? 'Avancé' : done >= 2 || state.quizAnswered >= 3 ? 'Intermédiaire' : 'Débutant';
+  document.getElementById('s-level').textContent = level;
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quiz-body');
+  if(state.quizIdx >= quizData.length) {
+    const pct = Math.round((state.quizCorrect / quizData.length) * 100);
+    const msg = pct >= 80 ? '🎯 Excellent — tu es prêt pour l\'entretien.' : pct >= 60 ? '👍 Bon niveau, relis les modules faibles.' : '📚 Continue à réviser les concepts clés.';
+    container.innerHTML = `<div class="card" style="text-align:center;"><h2>Quiz terminé</h2><div class="score-big">${state.quizCorrect}/${quizData.length}</div><div class="score-sub">${msg}</div><div class="nav-btns" style="justify-content:center;"><button class="btn btn-primary" onclick="state.quizIdx=0;state.quizCorrect=0;state.quizAnswered=0;renderQuiz()">Recommencer</button><button class="btn btn-outline" onclick="show('ratios')">Revoir les formules</button></div></div>`;
+    return;
+  }
+  const q = quizData[state.quizIdx];
+  const optsHtml = q.opts.map((o, i) => `<button class="opt" onclick="answerQuiz(${i})">${o}</button>`).join('');
+  container.innerHTML = `<div class="card"><div class="quiz-counter">Question ${state.quizIdx + 1} / ${quizData.length}</div><div class="quiz-q">${q.q}</div><div class="opts" id="opts">${optsHtml}</div><div id="qfb"></div></div>`;
+}
+
+function answerQuiz(idx) {
+  const q = quizData[state.quizIdx];
+  document.querySelectorAll('.opt').forEach(o => o.disabled = true);
+  const opts = document.querySelectorAll('.opt');
+  opts[q.correct].classList.add('correct');
+  const ok = idx === q.correct;
+  if(!ok) opts[idx].classList.add('wrong');
+  if(ok) state.quizCorrect++;
+  state.quizAnswered++;
+  document.getElementById('qfb').innerHTML = `<div class="feedback ${ok ? 'ok' : 'ko'}">${ok ? '✓ Correct — ' : '✗ Incorrect — '}${q.explain}</div><div style="margin-top:12px;"><button class="btn btn-primary" onclick="state.quizIdx++;renderQuiz()">Question suivante →</button></div>`;
+  updateStats();
+}
+
+function renderInterview() {
+  const container = document.getElementById('interview-body');
+  if(state.interviewIdx >= interviews.length) {
+    container.innerHTML = `<div class="card" style="text-align:center;"><h2>Toutes les questions vues !</h2><p style="margin:1rem 0;">Tu as parcouru les 6 questions clés. Répète-les à voix haute jusqu'à ce que les réponses viennent naturellement.</p><div class="nav-btns" style="justify-content:center;"><button class="btn btn-primary" onclick="state.interviewIdx=0;renderInterview()">Recommencer</button></div></div>`;
+    return;
+  }
+  const q = interviews[state.interviewIdx];
+  container.innerHTML = `
+    <div class="card">
+      <div class="quiz-counter">Question ${state.interviewIdx + 1} / ${interviews.length}</div>
+      <div class="interview-q">${q.q}</div>
+      <div class="tip">${q.tip}</div>
+      <div class="nav-btns" style="margin-top:1.25rem;">
+        <button class="btn btn-primary" onclick="state.interviewIdx++;updateStats();renderInterview()">Question suivante →</button>
+        <button class="btn btn-outline" onclick="state.interviewIdx = Math.max(0, state.interviewIdx-1);renderInterview()">← Précédente</button>
+      </div>
+    </div>`;
+  updateStats();
+}
+</script>
+</body>
+</html>
